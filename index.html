@@ -225,12 +225,13 @@
 <div class="container">
     <header>
         <h1>Velocity Multiplier Hub</h1>
-        <p>Dynamic scenario mapping for fixed and unknown profit structures</p>
+        <p>Dynamic scenario mapping for fixed and custom profit structures</p>
     </header>
 
     <div class="grid-layout">
+        <!-- PANEL 1: TARGET MATRIX MAPPER (UPDATED REAL TIERS) -->
         <div class="card">
-            <div class="card-title">Target Matrix (Known Tiers)</div>
+            <div class="card-title">Target Matrix (Real Tiers)</div>
             
             <div class="input-group">
                 <label for="monthlyGoal">Global Monthly Goal</label>
@@ -241,9 +242,11 @@
             </div>
 
             <div class="matrix-list" id="matrixContainer">
-                </div>
+                <!-- JavaScript handles generation dynamically -->
+            </div>
         </div>
 
+        <!-- PANEL 2: HYBRID STRUCTURE -->
         <div class="card">
             <div class="card-title">Hybrid Structure</div>
             
@@ -286,26 +289,34 @@
             </div>
         </div>
 
+        <!-- PANEL 3: UPDATED VOLUME & PROFIT MATCHER -->
         <div class="card">
-            <div class="card-title">Unknown Benefit Resolver</div>
+            <div class="card-title">Volume & Profit Matcher</div>
             
             <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: -0.5rem;">
-                Don't know your profit per item? Work backward by entering how many orders you can realistically pull off in a month.
+                Match your estimated orders directly with your profit per item to view your total projected earnings.
             </p>
 
             <div class="input-group">
-                <label for="estimatedOrders">Estimated Max Orders / Month</label>
+                <label for="estimatedOrders">Estimated Max Orders</label>
                 <div class="input-wrapper">
-                    <input type="number" id="estimatedOrders" value="15" class="no-prefix">
+                    <input type="number" id="estimatedOrders" value="30" class="no-prefix">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="estimatedProfitPerItem">Profit Per Item</label>
+                <div class="input-wrapper">
+                    <span class="input-prefix">$</span>
+                    <input type="number" id="estimatedProfitPerItem" value="10">
                 </div>
             </div>
 
             <div class="hybrid-summary orange-glow">
-                <label>Minimum Required Net Profit</label>
-                <div class="hybrid-needed orange-text" id="requiredMinProfit">$20.00</div>
+                <label>Total Projected Sales Revenue</label>
+                <div class="hybrid-needed orange-text" id="projectedTotalEarnings">$300.00</div>
                 <div class="sub-breakdown" id="unknownResolverText">
-                    If you can only get <strong>15 orders</strong> a month:<br>
-                    Every order <strong>must make $20.00 clear benefit</strong> to reach your target.
+                    Selling <strong>30 items</strong> at <strong>$10 profit each</strong> yields <strong>$300.00</strong> total.
                 </div>
             </div>
 
@@ -316,7 +327,7 @@
                         <span class="matrix-sub">Pace to hit your estimated order count</span>
                     </div>
                     <div class="matrix-result">
-                        <span class="count-highlight" id="unknownDailyPace" style="color: var(--accent-orange);">0.5</span>
+                        <span class="count-highlight" id="unknownDailyPace" style="color: var(--accent-orange);">1.0</span>
                         <span class="days-sub">orders / day</span>
                     </div>
                 </div>
@@ -329,36 +340,43 @@
     const goalInput = document.getElementById('monthlyGoal');
     const salaryInput = document.getElementById('baseSalary');
     const customProfitInput = document.getElementById('customProfit');
+    
+    // Elements for the modified Panel 3
     const estimatedOrdersInput = document.getElementById('estimatedOrders');
+    const estimatedProfitPerItemInput = document.getElementById('estimatedProfitPerItem');
+    const projectedTotalEarnings = document.getElementById('projectedTotalEarnings');
+    const unknownResolverText = document.getElementById('unknownResolverText');
+    const unknownDailyPace = document.getElementById('unknownDailyPace');
     
     const matrixContainer = document.getElementById('matrixContainer');
     const remainingSalesTarget = document.getElementById('remainingSalesTarget');
     const hybridResultText = document.getElementById('hybridResultText');
     const hybridDailyRate = document.getElementById('hybridDailyRate');
-    
-    const requiredMinProfit = document.getElementById('requiredMinProfit');
-    const unknownResolverText = document.getElementById('unknownResolverText');
-    const unknownDailyPace = document.getElementById('unknownDailyPace');
 
-    const profitTiers = [500, 250, 100, 50, 25, 10];
+    // New adjusted realistic profit tiers matching your business structure
+    const profitTiers = [100, 50, 25, 15, 10, 5];
 
     function calculateMatrix() {
         const goal = Math.max(0, parseFloat(goalInput.value) || 0);
         const salary = Math.max(0, parseFloat(salaryInput.value) || 0);
         const customProfit = Math.max(1, parseFloat(customProfitInput.value) || 1);
-        const estOrders = Math.max(1, parseInt(estimatedOrdersInput.value) || 1);
+        
+        const estOrders = Math.max(0, parseInt(estimatedOrdersInput.value) || 0);
+        const estProfitEach = Math.max(0, parseFloat(estimatedProfitPerItemInput.value) || 0);
 
-        // 1. Panel 1: Known Matrix
+        // 1. Panel 1: Adjusted Known Matrix
         matrixContainer.innerHTML = '';
         profitTiers.forEach(tier => {
-            const unitsNeeded = Math.ceil(goal / tier);
+            const unitsNeeded = goal > 0 ? Math.ceil(goal / tier) : 0;
             const daysInterval = unitsNeeded > 0 ? (30 / unitsNeeded).toFixed(1) : 0;
             
             let frequencyText = '';
             if (unitsNeeded >= 30) {
                 frequencyText = `${(unitsNeeded / 30).toFixed(1)} items / day`;
-            } else {
+            } else if (unitsNeeded > 0) {
                 frequencyText = `1 item every ${daysInterval} days`;
+            } else {
+                frequencyText = '0 items required';
             }
 
             const itemHtml = `
@@ -394,26 +412,18 @@
             hybridDailyRate.textContent = hybridDaily;
         }
 
-        // 3. Panel 3: Unknown Benefit Logic
-        // How much profit do you need per item if you only have a certain number of orders?
-        // It accounts for whether you have a baseline salary assisting you or not.
-        const targetToCover = remainingTarget; // Uses the gap after salary
-        const minProfitNeeded = (targetToCover / estOrders).toFixed(2);
+        // 3. Panel 3: Volume & Profit Matcher Multiplication Logic
+        const totalSalesProfit = estOrders * estProfitEach;
+        projectedTotalEarnings.textContent = `$${totalSalesProfit.toFixed(2)}`;
         
-        requiredMinProfit.textContent = `$${minProfitNeeded}`;
         unknownDailyPace.textContent = (estOrders / 30).toFixed(1);
         
-        if (targetToCover === 0) {
-            unknownResolverText.innerHTML = "Salary covers your target. Any profit you make on items is pure bonus!";
-        } else {
-            unknownResolverText.innerHTML = `
-                If you can pull off <strong>${estOrders} orders</strong> this month:<br>
-                Every order <strong>must yield $${minProfitNeeded} net profit</strong> to close the gap.
-            `;
-        }
+        unknownResolverText.innerHTML = `
+            Selling <strong>${estOrders} items</strong> at <strong>$${estProfitEach.toFixed(2)} profit each</strong> yields <strong>$${totalSalesProfit.toFixed(2)}</strong> total.
+        `;
     }
 
-    [goalInput, salaryInput, customProfitInput, estimatedOrdersInput].forEach(input => {
+    [goalInput, salaryInput, customProfitInput, estimatedOrdersInput, estimatedProfitPerItemInput].forEach(input => {
         input.addEventListener('input', calculateMatrix);
     });
 
