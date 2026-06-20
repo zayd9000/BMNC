@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Velocity Multiplier Hub</title>
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --bg-card: #131a26;
+            --bg-input: #1c2636;
+            --accent-green: #00ff66;
+            --accent-cyan: #00f0ff;
+            --accent-orange: #ff9900;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --border-color: #26354a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
+            background: linear-gradient(to right, var(--text-primary), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 900px) {
+            .grid-layout {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-prefix {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.75rem 1rem 0.75rem 2rem;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: border-color 0.2s;
+        }
+
+        input.no-prefix {
+            padding-left: 1rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+
+        .matrix-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .matrix-item {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .matrix-label {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .matrix-val {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .matrix-sub {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .matrix-result {
+            text-align: right;
+        }
+
+        .count-highlight {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--accent-green);
+        }
+
+        .days-sub {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            display: block;
+        }
+
+        .hybrid-summary {
+            background: linear-gradient(135deg, #1c2636 0%, #111823 100%);
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .hybrid-summary.orange-glow {
+            border-color: var(--accent-orange);
+        }
+
+        .hybrid-needed {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--accent-cyan);
+            margin: 0.25rem 0;
+        }
+
+        .hybrid-needed.orange-text {
+            color: var(--accent-orange);
+        }
+
+        .sub-breakdown {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Velocity Multiplier Hub</h1>
+        <p>Dynamic scenario mapping for fixed and unknown profit structures</p>
+    </header>
+
+    <div class="grid-layout">
+        <div class="card">
+            <div class="card-title">Target Matrix (Known Tiers)</div>
+            
+            <div class="input-group">
+                <label for="monthlyGoal">Global Monthly Goal</label>
+                <div class="input-wrapper">
+                    <span class="input-prefix">$</span>
+                    <input type="number" id="monthlyGoal" value="500">
+                </div>
+            </div>
+
+            <div class="matrix-list" id="matrixContainer">
+                </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Hybrid Structure</div>
+            
+            <div class="input-group">
+                <label for="baseSalary">Secure Base Salary</label>
+                <div class="input-wrapper">
+                    <span class="input-prefix">$</span>
+                    <input type="number" id="baseSalary" value="200">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="customProfit">Net Profit Per Order</label>
+                <div class="input-wrapper">
+                    <span class="input-prefix">$</span>
+                    <input type="number" id="customProfit" value="10">
+                </div>
+            </div>
+
+            <div class="hybrid-summary" style="border-color: var(--accent-cyan);">
+                <label>Remaining Sales Target</label>
+                <div class="hybrid-needed" id="remainingSalesTarget">$300</div>
+                <div class="sub-breakdown" id="hybridResultText">
+                    To bridge the gap at <strong>$10 profit/item</strong>:<br>
+                    You need to clear <strong>30 orders</strong> this month.
+                </div>
+            </div>
+            
+            <div class="matrix-list">
+                <div class="matrix-item">
+                    <div class="matrix-label">
+                        <span class="matrix-val">Daily Velocity Required</span>
+                        <span class="matrix-sub">To complete remaining hybrid orders</span>
+                    </div>
+                    <div class="matrix-result">
+                        <span class="count-highlight" id="hybridDailyRate" style="color: var(--accent-cyan);">1.0</span>
+                        <span class="days-sub">orders / day</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Unknown Benefit Resolver</div>
+            
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: -0.5rem;">
+                Don't know your profit per item? Work backward by entering how many orders you can realistically pull off in a month.
+            </p>
+
+            <div class="input-group">
+                <label for="estimatedOrders">Estimated Max Orders / Month</label>
+                <div class="input-wrapper">
+                    <input type="number" id="estimatedOrders" value="15" class="no-prefix">
+                </div>
+            </div>
+
+            <div class="hybrid-summary orange-glow">
+                <label>Minimum Required Net Profit</label>
+                <div class="hybrid-needed orange-text" id="requiredMinProfit">$20.00</div>
+                <div class="sub-breakdown" id="unknownResolverText">
+                    If you can only get <strong>15 orders</strong> a month:<br>
+                    Every order <strong>must make $20.00 clear benefit</strong> to reach your target.
+                </div>
+            </div>
+
+            <div class="matrix-list">
+                <div class="matrix-item">
+                    <div class="matrix-label">
+                        <span class="matrix-val">Target Daily Volume</span>
+                        <span class="matrix-sub">Pace to hit your estimated order count</span>
+                    </div>
+                    <div class="matrix-result">
+                        <span class="count-highlight" id="unknownDailyPace" style="color: var(--accent-orange);">0.5</span>
+                        <span class="days-sub">orders / day</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const goalInput = document.getElementById('monthlyGoal');
+    const salaryInput = document.getElementById('baseSalary');
+    const customProfitInput = document.getElementById('customProfit');
+    const estimatedOrdersInput = document.getElementById('estimatedOrders');
+    
+    const matrixContainer = document.getElementById('matrixContainer');
+    const remainingSalesTarget = document.getElementById('remainingSalesTarget');
+    const hybridResultText = document.getElementById('hybridResultText');
+    const hybridDailyRate = document.getElementById('hybridDailyRate');
+    
+    const requiredMinProfit = document.getElementById('requiredMinProfit');
+    const unknownResolverText = document.getElementById('unknownResolverText');
+    const unknownDailyPace = document.getElementById('unknownDailyPace');
+
+    const profitTiers = [500, 250, 100, 50, 25, 10];
+
+    function calculateMatrix() {
+        const goal = Math.max(0, parseFloat(goalInput.value) || 0);
+        const salary = Math.max(0, parseFloat(salaryInput.value) || 0);
+        const customProfit = Math.max(1, parseFloat(customProfitInput.value) || 1);
+        const estOrders = Math.max(1, parseInt(estimatedOrdersInput.value) || 1);
+
+        // 1. Panel 1: Known Matrix
+        matrixContainer.innerHTML = '';
+        profitTiers.forEach(tier => {
+            const unitsNeeded = Math.ceil(goal / tier);
+            const daysInterval = unitsNeeded > 0 ? (30 / unitsNeeded).toFixed(1) : 0;
+            
+            let frequencyText = '';
+            if (unitsNeeded >= 30) {
+                frequencyText = `${(unitsNeeded / 30).toFixed(1)} items / day`;
+            } else {
+                frequencyText = `1 item every ${daysInterval} days`;
+            }
+
+            const itemHtml = `
+                <div class="matrix-item">
+                    <div class="matrix-label">
+                        <span class="matrix-val">$${tier} Profit Orders</span>
+                        <span class="matrix-sub">Net payout per item cleared</span>
+                    </div>
+                    <div class="matrix-result">
+                        <span class="count-highlight">${unitsNeeded}</span>
+                        <span class="days-sub">${frequencyText}</span>
+                    </div>
+                </div>
+            `;
+            matrixContainer.insertAdjacentHTML('beforeend', itemHtml);
+        });
+
+        // 2. Panel 2: Hybrid Calculations
+        const remainingTarget = Math.max(0, goal - salary);
+        remainingSalesTarget.textContent = `$${remainingTarget}`;
+
+        if (remainingTarget === 0) {
+            hybridResultText.innerHTML = "Your salary completely covers your monthly goal! No sales mandatory.";
+            hybridDailyRate.textContent = "0.0";
+        } else {
+            const hybridUnitsNeeded = Math.ceil(remainingTarget / customProfit);
+            const hybridDaily = (hybridUnitsNeeded / 30).toFixed(1);
+            
+            hybridResultText.innerHTML = `
+                To bridge the gap at <strong>$${customProfit} profit/item</strong>:<br>
+                You need to clear <strong>${hybridUnitsNeeded} orders</strong> this month.
+            `;
+            hybridDailyRate.textContent = hybridDaily;
+        }
+
+        // 3. Panel 3: Unknown Benefit Logic
+        // How much profit do you need per item if you only have a certain number of orders?
+        // It accounts for whether you have a baseline salary assisting you or not.
+        const targetToCover = remainingTarget; // Uses the gap after salary
+        const minProfitNeeded = (targetToCover / estOrders).toFixed(2);
+        
+        requiredMinProfit.textContent = `$${minProfitNeeded}`;
+        unknownDailyPace.textContent = (estOrders / 30).toFixed(1);
+        
+        if (targetToCover === 0) {
+            unknownResolverText.innerHTML = "Salary covers your target. Any profit you make on items is pure bonus!";
+        } else {
+            unknownResolverText.innerHTML = `
+                If you can pull off <strong>${estOrders} orders</strong> this month:<br>
+                Every order <strong>must yield $${minProfitNeeded} net profit</strong> to close the gap.
+            `;
+        }
+    }
+
+    [goalInput, salaryInput, customProfitInput, estimatedOrdersInput].forEach(input => {
+        input.addEventListener('input', calculateMatrix);
+    });
+
+    calculateMatrix();
+</script>
+
+</body>
+</html>
