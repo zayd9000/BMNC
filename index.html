@@ -21,7 +21,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
@@ -34,6 +34,11 @@
             min-height: 100vh;
         }
 
+        /* Support Right-to-Left writing orientation */
+        body.rtl {
+            direction: rtl;
+        }
+
         .container {
             width: 100%;
             max-width: 1200px;
@@ -44,7 +49,7 @@
 
         header {
             text-align: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
 
         header h1 {
@@ -61,6 +66,32 @@
             color: var(--text-secondary);
             margin-top: 0.5rem;
             font-size: 0.95rem;
+        }
+
+        /* Language Button Switcher styling */
+        .lang-switcher {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .lang-btn {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem 1.25rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .lang-btn.active {
+            background-color: var(--accent-cyan);
+            color: var(--bg-main);
+            border-color: var(--accent-cyan);
         }
 
         .grid-layout {
@@ -121,6 +152,11 @@
             font-weight: 600;
         }
 
+        body.rtl .input-prefix {
+            left: auto;
+            right: 1rem;
+        }
+
         input {
             width: 100%;
             background-color: var(--bg-input);
@@ -133,8 +169,15 @@
             transition: border-color 0.2s;
         }
 
+        body.rtl input {
+            padding: 0.75rem 2rem 0.75rem 1rem;
+        }
+
         input.no-prefix {
             padding-left: 1rem;
+        }
+        body.rtl input.no-prefix {
+            padding-right: 1rem;
         }
 
         input:focus {
@@ -156,6 +199,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 0.5rem;
         }
 
         .matrix-label {
@@ -176,6 +220,9 @@
 
         .matrix-result {
             text-align: right;
+        }
+        body.rtl .matrix-result {
+            text-align: left;
         }
 
         .count-highlight {
@@ -224,34 +271,36 @@
 
 <div class="container">
     <header>
-        <h1>Velocity Multiplier Hub</h1>
-        <p>Dynamic scenario mapping for fixed and custom profit structures</p>
+        <h1 id="mainTitle">Velocity Multiplier Hub</h1>
+        <p id="mainSubtitle">Dynamic scenario mapping for fixed and custom profit structures</p>
     </header>
 
+    <div class="lang-switcher">
+        <button class="lang-btn active" onclick="setLanguage('en')">English</button>
+        <button class="lang-btn" onclick="setLanguage('ku')">Kurdî</button>
+        <button class="lang-btn" onclick="setLanguage('ar')">العربية</button>
+    </div>
+
     <div class="grid-layout">
-        <!-- PANEL 1: TARGET MATRIX MAPPER (UPDATED REAL TIERS) -->
         <div class="card">
-            <div class="card-title">Target Matrix (Real Tiers)</div>
+            <div class="card-title" id="titlePanel1">Target Matrix (Real Tiers)</div>
             
             <div class="input-group">
-                <label for="monthlyGoal">Global Monthly Goal</label>
+                <label id="lblGlobalGoal" for="monthlyGoal">Global Monthly Goal</label>
                 <div class="input-wrapper">
                     <span class="input-prefix">$</span>
                     <input type="number" id="monthlyGoal" value="500">
                 </div>
             </div>
 
-            <div class="matrix-list" id="matrixContainer">
-                <!-- JavaScript handles generation dynamically -->
-            </div>
+            <div class="matrix-list" id="matrixContainer"></div>
         </div>
 
-        <!-- PANEL 2: HYBRID STRUCTURE -->
         <div class="card">
-            <div class="card-title">Hybrid Structure</div>
+            <div class="card-title" id="titlePanel2">Hybrid Structure</div>
             
             <div class="input-group">
-                <label for="baseSalary">Secure Base Salary</label>
+                <label id="lblBaseSalary" for="baseSalary">Secure Base Salary</label>
                 <div class="input-wrapper">
                     <span class="input-prefix">$</span>
                     <input type="number" id="baseSalary" value="200">
@@ -259,7 +308,7 @@
             </div>
 
             <div class="input-group">
-                <label for="customProfit">Net Profit Per Order</label>
+                <label id="lblProfitPerOrder" for="customProfit">Net Profit Per Order</label>
                 <div class="input-wrapper">
                     <span class="input-prefix">$</span>
                     <input type="number" id="customProfit" value="10">
@@ -267,45 +316,41 @@
             </div>
 
             <div class="hybrid-summary" style="border-color: var(--accent-cyan);">
-                <label>Remaining Sales Target</label>
+                <label id="lblRemainingSales">Remaining Sales Target</label>
                 <div class="hybrid-needed" id="remainingSalesTarget">$300</div>
-                <div class="sub-breakdown" id="hybridResultText">
-                    To bridge the gap at <strong>$10 profit/item</strong>:<br>
-                    You need to clear <strong>30 orders</strong> this month.
-                </div>
+                <div class="sub-breakdown" id="hybridResultText"></div>
             </div>
             
             <div class="matrix-list">
                 <div class="matrix-item">
                     <div class="matrix-label">
-                        <span class="matrix-val">Daily Velocity Required</span>
-                        <span class="matrix-sub">To complete remaining hybrid orders</span>
+                        <span class="matrix-val" id="lblDailyVelocity">Daily Velocity Required</span>
+                        <span class="matrix-sub" id="lblDailyVelocitySub">To complete remaining hybrid orders</span>
                     </div>
                     <div class="matrix-result">
                         <span class="count-highlight" id="hybridDailyRate" style="color: var(--accent-cyan);">1.0</span>
-                        <span class="days-sub">orders / day</span>
+                        <span class="days-sub" id="lblOrdersPerDay1">orders / day</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- PANEL 3: UPDATED VOLUME & PROFIT MATCHER -->
         <div class="card">
-            <div class="card-title">Volume & Profit Matcher</div>
+            <div class="card-title" id="titlePanel3">Volume & Profit Matcher</div>
             
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: -0.5rem;">
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: -0.5rem;" id="descPanel3">
                 Match your estimated orders directly with your profit per item to view your total projected earnings.
             </p>
 
             <div class="input-group">
-                <label for="estimatedOrders">Estimated Max Orders</label>
+                <label id="lblEstOrders" for="estimatedOrders">Estimated Max Orders</label>
                 <div class="input-wrapper">
                     <input type="number" id="estimatedOrders" value="30" class="no-prefix">
                 </div>
             </div>
 
             <div class="input-group">
-                <label for="estimatedProfitPerItem">Profit Per Item</label>
+                <label id="lblEstProfitEach" for="estimatedProfitPerItem">Profit Per Item</label>
                 <div class="input-wrapper">
                     <span class="input-prefix">$</span>
                     <input type="number" id="estimatedProfitPerItem" value="10">
@@ -313,22 +358,20 @@
             </div>
 
             <div class="hybrid-summary orange-glow">
-                <label>Total Projected Sales Revenue</label>
+                <label id="lblTotalProjected">Total Projected Sales Revenue</label>
                 <div class="hybrid-needed orange-text" id="projectedTotalEarnings">$300.00</div>
-                <div class="sub-breakdown" id="unknownResolverText">
-                    Selling <strong>30 items</strong> at <strong>$10 profit each</strong> yields <strong>$300.00</strong> total.
-                </div>
+                <div class="sub-breakdown" id="unknownResolverText"></div>
             </div>
 
             <div class="matrix-list">
                 <div class="matrix-item">
                     <div class="matrix-label">
-                        <span class="matrix-val">Target Daily Volume</span>
-                        <span class="matrix-sub">Pace to hit your estimated order count</span>
+                        <span class="matrix-val" id="lblTargetDailyPace">Target Daily Volume</span>
+                        <span class="matrix-sub" id="lblTargetDailyPaceSub">Pace to hit your estimated order count</span>
                     </div>
                     <div class="matrix-result">
                         <span class="count-highlight" id="unknownDailyPace" style="color: var(--accent-orange);">1.0</span>
-                        <span class="days-sub">orders / day</span>
+                        <span class="days-sub" id="lblOrdersPerDay2">orders / day</span>
                     </div>
                 </div>
             </div>
@@ -337,26 +380,171 @@
 </div>
 
 <script>
-    const goalInput = document.getElementById('monthlyGoal');
-    const salaryInput = document.getElementById('baseSalary');
-    const customProfitInput = document.getElementById('customProfit');
-    
-    // Elements for the modified Panel 3
-    const estimatedOrdersInput = document.getElementById('estimatedOrders');
-    const estimatedProfitPerItemInput = document.getElementById('estimatedProfitPerItem');
-    const projectedTotalEarnings = document.getElementById('projectedTotalEarnings');
-    const unknownResolverText = document.getElementById('unknownResolverText');
-    const unknownDailyPace = document.getElementById('unknownDailyPace');
-    
-    const matrixContainer = document.getElementById('matrixContainer');
-    const remainingSalesTarget = document.getElementById('remainingSalesTarget');
-    const hybridResultText = document.getElementById('hybridResultText');
-    const hybridDailyRate = document.getElementById('hybridDailyRate');
+    let currentLang = 'en';
 
-    // New adjusted realistic profit tiers matching your business structure
+    const languages = {
+        en: {
+            mainTitle: "Velocity Multiplier Hub",
+            mainSubtitle: "Dynamic scenario mapping for fixed and custom profit structures",
+            titlePanel1: "Target Matrix (Real Tiers)",
+            lblGlobalGoal: "Global Monthly Goal",
+            titlePanel2: "Hybrid Structure",
+            lblBaseSalary: "Secure Base Salary",
+            lblProfitPerOrder: "Net Profit Per Order",
+            lblRemainingSales: "Remaining Sales Target",
+            lblDailyVelocity: "Daily Velocity Required",
+            lblDailyVelocitySub: "To complete remaining hybrid orders",
+            lblOrdersPerDay: "orders / day",
+            titlePanel3: "Volume & Profit Matcher",
+            descPanel3: "Match your estimated orders directly with your profit per item to view your total projected earnings.",
+            lblEstOrders: "Estimated Max Orders",
+            lblEstProfitEach: "Profit Per Item",
+            lblTotalProjected: "Total Projected Sales Revenue",
+            lblTargetDailyPace: "Target Daily Volume",
+            lblTargetDailyPaceSub: "Pace to hit your estimated order count",
+            profitOrders: "Profit Orders",
+            payoutPerItem: "Net payout per item cleared",
+            itemsPerDay: "items / day",
+            itemEvery: "1 item every",
+            days: "days",
+            zeroRequired: "0 items required",
+            salaryCovers: "Your salary completely covers your monthly goal! No sales mandatory.",
+            bridgeGap: "To bridge the gap at",
+            profitItem: "profit/item",
+            needToClear: "You need to clear",
+            ordersThisMonth: "orders this month.",
+            selling: "Selling",
+            itemsAt: "items at",
+            profitEachYields: "profit each yields",
+            total: "total."
+        },
+        ku: {
+            mainTitle: "سەکۆی پلاندانانی داهات",
+            mainSubtitle: "نەخشەکردنی داینامیکی داهات بۆ قازانجی دیاریکراو و مۆدێلی فرۆشتن",
+            titlePanel1: "ماتریسی ئامانج (ئاستە ڕاستەقینەکان)",
+            lblGlobalGoal: "ئامانجی گشتی مانگانە",
+            titlePanel2: "پێکهاتەی تێکەڵاو",
+            lblBaseSalary: "مووچەی بنەڕەتی مسۆگەرکراو",
+            lblProfitPerOrder: "قازانجی پاک بۆ هەر داواکارییەک",
+            lblRemainingSales: "ئامانجی فرۆشتنی ماوە",
+            lblDailyVelocity: "خێرایی ڕۆژانەی پێویست",
+            lblDailyVelocitySub: "بۆ تەواوکردنی داواکارییە تێکەڵاوەکانی ماوە",
+            lblOrdersPerDay: "داواکاری / ڕۆژ",
+            titlePanel3: "هاوتاکەری قەبارە و قازانج",
+            descPanel3: "داواکارییە خەمڵێندراوەکانت ڕاستەوخۆ لەگەڵ قازانجی هەر بابەتێک هاوتا بکە بۆ بینینی کۆی گشتی داهاتی پێشبینیکراو.",
+            lblEstOrders: "خەمڵاندنی زۆرترین داواکاری",
+            lblEstProfitEach: "قازانج بۆ هەر بابەتێک",
+            lblTotalProjected: "کۆی گشتی داهاتی فرۆشتنی پێشبینیکراو",
+            lblTargetDailyPace: "قەبارەی ئامانجی ڕۆژانە",
+            lblTargetDailyPaceSub: "هەنگاونان بۆ گەیشتن بە ژمارەی داواکارییە خەمڵێندراوەکان",
+            profitOrders: "داواکاری قازانج",
+            payoutPerItem: "کۆی قازانجی پاک بۆ هەر بابەتێکی فرۆشراو",
+            itemsPerDay: "بابەت / ڕۆژ",
+            itemEvery: "١ بابەت لە هەر",
+            days: "ڕۆژێکدا",
+            zeroRequired: "هیچ بابەتێک پێویست نییە",
+            salaryCovers: "مووچەکەت بە تەواوی ئامانجی مانگانەت دادەپۆشێت! فرۆشتن ناچاری نییە.",
+            bridgeGap: "بۆ پڕکردنەوەی بۆشاییەکە بە قازانجی",
+            profitItem: "بۆ هەر بابەتێک",
+            needToClear: "پێویستە فرۆشتن بۆ",
+            ordersThisMonth: "داواکاری بکەیت لەم مانگەدا.",
+            selling: "فرۆشتنی",
+            itemsAt: "بابەت بە قازانجی",
+            profitEachYields: "بۆ هەر دانەیەک، کۆی گشتی دەکاتە",
+            total: ""
+        },
+        ar: {
+            mainTitle: "منصة مضاعف السرعة المالية",
+            mainSubtitle: "تخطيط السيناريوهات الديناميكية لهياكل الأرباح الثابتة والمخصصة",
+            titlePanel1: "مصفوفة الأهداف (المستويات الحقيقية)",
+            lblGlobalGoal: "الهدف الشهري الإجمالي",
+            titlePanel2: "الهيكل المختلط",
+            lblBaseSalary: "الراتب الأساسي المضمون",
+            lblProfitPerOrder: "صافي الربح لكل طلب",
+            lblRemainingSales: "الهدف المتبقي من المبيعات",
+            lblDailyVelocity: "السرعة اليومية المطلوبة",
+            lblDailyVelocitySub: "لإكمال طلبات البيع المختلطة المتبقية",
+            lblOrdersPerDay: "طلبات / يوم",
+            titlePanel3: "مطابق الحجم والأرباح",
+            descPanel3: "طابق طلباتك المقدرة مباشرة مع ربحك لكل قطعة لعرض إجمالي أرباحك المتوقعة.",
+            lblEstOrders: "الالطلبات القصوى المقدرة",
+            lblEstProfitEach: "الربح لكل قطعة",
+            lblTotalProjected: "إجمالي إيرادات المبيعات المتوقعة",
+            lblTargetDailyPace: "الحجم اليومي المستهدف",
+            lblTargetDailyPaceSub: "الوتيرة المطلوبة للوصول إلى عدد طلباتك المقدرة",
+            profitOrders: "طلبات بربح",
+            payoutPerItem: "صافي الربح لكل قطعة مباعة",
+            itemsPerDay: "قطع / يوم",
+            itemEvery: "قطعة واحدة كل",
+            days: "أيام",
+            zeroRequired: "المبيعات المطلوبة: 0",
+            salaryCovers: "راتبك يغطي هدفك الشهري بالكامل! المبيعات ليست إلزامية.",
+            bridgeGap: "لسد الفجوة بربح",
+            profitItem: "لكل قطعة",
+            needToClear: "تحتاج إلى إتمام",
+            ordersThisMonth: "طلبات هذا الشهر.",
+            selling: "بيع",
+            itemsAt: "قطع بربح",
+            profitEachYields: "لكل قطعة يحقق لك",
+            total: "إجماليًا."
+        }
+    };
+
     const profitTiers = [100, 50, 25, 15, 10, 5];
 
+    function setLanguage(lang) {
+        currentLang = lang;
+        
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.querySelector(`.lang-btn[onclick="setLanguage('${lang}')"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+
+        // Toggle layout direction for RTL languages
+        if (lang === 'ku' || lang === 'ar') {
+            document.body.classList.add('rtl');
+        } else {
+            document.body.classList.remove('rtl');
+        }
+
+        const trans = languages[lang];
+        document.getElementById('mainTitle').textContent = trans.mainTitle;
+        document.getElementById('mainSubtitle').textContent = trans.mainSubtitle;
+        document.getElementById('titlePanel1').textContent = trans.titlePanel1;
+        document.getElementById('lblGlobalGoal').textContent = trans.lblGlobalGoal;
+        document.getElementById('titlePanel2').textContent = trans.titlePanel2;
+        document.getElementById('lblBaseSalary').textContent = trans.lblBaseSalary;
+        document.getElementById('lblProfitPerOrder').textContent = trans.lblProfitPerOrder;
+        document.getElementById('lblRemainingSales').textContent = trans.lblRemainingSales;
+        document.getElementById('lblDailyVelocity').textContent = trans.lblDailyVelocity;
+        document.getElementById('lblDailyVelocitySub').textContent = trans.lblDailyVelocitySub;
+        document.getElementById('lblOrdersPerDay1').textContent = trans.lblOrdersPerDay;
+        document.getElementById('titlePanel3').textContent = trans.titlePanel3;
+        document.getElementById('descPanel3').textContent = trans.descPanel3;
+        document.getElementById('lblEstOrders').textContent = trans.lblEstOrders;
+        document.getElementById('lblEstProfitEach').textContent = trans.lblEstProfitEach;
+        document.getElementById('lblTotalProjected').textContent = trans.lblTotalProjected;
+        document.getElementById('lblTargetDailyPace').textContent = trans.lblTargetDailyPace;
+        document.getElementById('lblTargetDailyPaceSub').textContent = trans.lblTargetDailyPaceSub;
+        document.getElementById('lblOrdersPerDay2').textContent = trans.lblOrdersPerDay;
+
+        calculateMatrix();
+    }
+
     function calculateMatrix() {
+        const goalInput = document.getElementById('monthlyGoal');
+        const salaryInput = document.getElementById('baseSalary');
+        const customProfitInput = document.getElementById('customProfit');
+        const estimatedOrdersInput = document.getElementById('estimatedOrders');
+        const estimatedProfitPerItemInput = document.getElementById('estimatedProfitPerItem');
+        
+        const matrixContainer = document.getElementById('matrixContainer');
+        const remainingSalesTarget = document.getElementById('remainingSalesTarget');
+        const hybridResultText = document.getElementById('hybridResultText');
+        const hybridDailyRate = document.getElementById('hybridDailyRate');
+        const projectedTotalEarnings = document.getElementById('projectedTotalEarnings');
+        const unknownResolverText = document.getElementById('unknownResolverText');
+        const unknownDailyPace = document.getElementById('unknownDailyPace');
+
         const goal = Math.max(0, parseFloat(goalInput.value) || 0);
         const salary = Math.max(0, parseFloat(salaryInput.value) || 0);
         const customProfit = Math.max(1, parseFloat(customProfitInput.value) || 1);
@@ -364,7 +552,9 @@
         const estOrders = Math.max(0, parseInt(estimatedOrdersInput.value) || 0);
         const estProfitEach = Math.max(0, parseFloat(estimatedProfitPerItemInput.value) || 0);
 
-        // 1. Panel 1: Adjusted Known Matrix
+        const trans = languages[currentLang];
+
+        // 1. Matrix Update
         matrixContainer.innerHTML = '';
         profitTiers.forEach(tier => {
             const unitsNeeded = goal > 0 ? Math.ceil(goal / tier) : 0;
@@ -372,18 +562,18 @@
             
             let frequencyText = '';
             if (unitsNeeded >= 30) {
-                frequencyText = `${(unitsNeeded / 30).toFixed(1)} items / day`;
+                frequencyText = `${(unitsNeeded / 30).toFixed(1)} ${trans.itemsPerDay}`;
             } else if (unitsNeeded > 0) {
-                frequencyText = `1 item every ${daysInterval} days`;
+                frequencyText = `${trans.itemEvery} ${daysInterval} ${trans.days}`;
             } else {
-                frequencyText = '0 items required';
+                frequencyText = trans.zeroRequired;
             }
 
             const itemHtml = `
                 <div class="matrix-item">
                     <div class="matrix-label">
-                        <span class="matrix-val">$${tier} Profit Orders</span>
-                        <span class="matrix-sub">Net payout per item cleared</span>
+                        <span class="matrix-val">$${tier} ${trans.profitOrders}</span>
+                        <span class="matrix-sub">${trans.payoutPerItem}</span>
                     </div>
                     <div class="matrix-result">
                         <span class="count-highlight">${unitsNeeded}</span>
@@ -394,40 +584,42 @@
             matrixContainer.insertAdjacentHTML('beforeend', itemHtml);
         });
 
-        // 2. Panel 2: Hybrid Calculations
+        // 2. Hybrid Layout Calculation
         const remainingTarget = Math.max(0, goal - salary);
         remainingSalesTarget.textContent = `$${remainingTarget}`;
 
         if (remainingTarget === 0) {
-            hybridResultText.innerHTML = "Your salary completely covers your monthly goal! No sales mandatory.";
+            hybridResultText.innerHTML = trans.salaryCovers;
             hybridDailyRate.textContent = "0.0";
         } else {
             const hybridUnitsNeeded = Math.ceil(remainingTarget / customProfit);
             const hybridDaily = (hybridUnitsNeeded / 30).toFixed(1);
             
             hybridResultText.innerHTML = `
-                To bridge the gap at <strong>$${customProfit} profit/item</strong>:<br>
-                You need to clear <strong>${hybridUnitsNeeded} orders</strong> this month.
+                ${trans.bridgeGap} <strong>$${customProfit} ${trans.profitItem}</strong>:<br>
+                ${trans.needToClear} <strong>${hybridUnitsNeeded}</strong> ${trans.ordersThisMonth}
             `;
             hybridDailyRate.textContent = hybridDaily;
         }
 
-        // 3. Panel 3: Volume & Profit Matcher Multiplication Logic
+        // 3. Matcher Output Calculation
         const totalSalesProfit = estOrders * estProfitEach;
         projectedTotalEarnings.textContent = `$${totalSalesProfit.toFixed(2)}`;
         
         unknownDailyPace.textContent = (estOrders / 30).toFixed(1);
         
         unknownResolverText.innerHTML = `
-            Selling <strong>${estOrders} items</strong> at <strong>$${estProfitEach.toFixed(2)} profit each</strong> yields <strong>$${totalSalesProfit.toFixed(2)}</strong> total.
+            ${trans.selling} <strong>${estOrders}</strong> ${trans.itemsAt} <strong>$${estProfitEach.toFixed(2)}</strong> ${trans.profitEachYields} <strong>$${totalSalesProfit.toFixed(2)}</strong> ${trans.total}
         `;
     }
 
-    [goalInput, salaryInput, customProfitInput, estimatedOrdersInput, estimatedProfitPerItemInput].forEach(input => {
-        input.addEventListener('input', calculateMatrix);
+    // Event listeners
+    ['monthlyGoal', 'baseSalary', 'customProfit', 'estimatedOrders', 'estimatedProfitPerItem'].forEach(id => {
+        document.getElementById(id).addEventListener('input', calculateMatrix);
     });
 
-    calculateMatrix();
+    // Default to English startup
+    setLanguage('en');
 </script>
 
 </body>
